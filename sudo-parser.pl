@@ -360,10 +360,10 @@ sub parse {
 			if ($_ !~ /^#/) {
 				$_ =~ s/#.*//g;
 				if ($_ =~ /^Defaults/) {
-					print "parse defaults\n";
+					print "I: parse defaults\n";
 				} else {
 					if ($_ =~ /Host_Alias\s+([A-Za-z0-9_]+?)\s*=(.*)/) {
-						print "parse host alias\n";
+						print "I: parse host alias\n";
 					} else {
 						if ($_ =~ /User_Alias\s+([A-Za-z0-9_]+?)\s*=(.*)/) {
 							$aliasname = $1;
@@ -424,7 +424,7 @@ sub parse {
 											}
 										}
 									} else {
-										print "unknown: " . $_ . "\n";
+										print "W: unknown: " . $_ . "\n";
 									}
 								}
 							}
@@ -433,9 +433,11 @@ sub parse {
 				}
 			} else {
 				if ($_ =~ /^#include (.*)/) {
+					print "I: parsing " . getcwd() . $1 . "\n";
 					parse(getcwd() . $1);
 				} else {
 					if ($_ =~ /^#includedir (.*)/) {
+						print "I: parsing " . getcwd() . $1 . "\n";
 						foreach $includefilename (glob(getcwd() . $1 . "/*")) {
 							parse($includefilename);
 						}
