@@ -24,16 +24,11 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 use strict;
+
+use File::Basename;
+use Getopt::Std;
 use Cwd;
 
-my %commandaliases;
-my %useraliases;
-my %allowedlist;
-my $usernameorgroupname;
-my $realusernameorgroupname;
-my $commandname;
-my $realcommandname;
-my $bannedcommandname;
 my @bannedlist = (
 	".*ALL.*",
 	".*\/tmp.*",
@@ -275,6 +270,16 @@ my @bannedlist = (
 	".*\/zypper.*",
 );
 
+my %commandaliases;
+my %useraliases;
+my %allowedlist;
+my $usernameorgroupname;
+my $realusernameorgroupname;
+my $commandname;
+my $realcommandname;
+my $bannedcommandname;
+my $filename;
+
 sub resolveCommandnames {
 	my $commandnameslist;
 	my $realcommandnameslist;
@@ -448,7 +453,25 @@ sub parse {
 	}
 }
 
-parse($ARGV[0]);
+sub main::HELP_MESSAGE {
+	die "usage: " . basename($0) . " <filename>";
+}
+
+sub main::VERSION_MESSAGE {
+	print basename($0) . " 1.0\n";
+}
+
+$filename = shift;
+
+if (defined($filename)) {
+	if (! -e $filename) {
+		Getopt::Std::help_mess("", "main");
+	}
+} else {
+	Getopt::Std::help_mess("", "main");
+}
+
+parse($filename);
 foreach $usernameorgroupname (keys %allowedlist) {
 	if (defined($useraliases{$usernameorgroupname})) {
 		foreach $realusernameorgroupname (@{resolveUsernamesAndGroupnames(join(",", @{$useraliases{$usernameorgroupname}}))}) {
