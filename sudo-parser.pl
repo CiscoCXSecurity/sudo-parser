@@ -433,12 +433,12 @@ sub parse {
 				}
 			} else {
 				if ($_ =~ /^#include (.*)/) {
-					print "I: parsing " . getcwd() . $1 . "\n";
-					parse(getcwd() . $1);
+					print "I: parsing " . $1 . "\n";
+					parse($1);
 				} else {
 					if ($_ =~ /^#includedir (.*)/) {
-						print "I: parsing " . getcwd() . $1 . "\n";
-						foreach $includefilename (glob(getcwd() . $1 . "/*")) {
+						print "I: parsing " . $1 . "\n";
+						foreach $includefilename (glob($1 . "/*")) {
 							parse($includefilename);
 						}
 					}
