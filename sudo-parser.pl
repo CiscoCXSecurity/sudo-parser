@@ -28,6 +28,7 @@ use strict;
 use File::Basename;
 use Getopt::Std;
 use Cwd;
+use Data::Dumper;
 
 my @bannedlist = (
 	".*ALL.*",
@@ -303,7 +304,7 @@ sub resolveCommandnames {
 	$commandnameslist = shift;
 	$realcommandnameslist = ();
 	for $commandname (split(/,/, $commandnameslist)) {
-		if ($commandname =~ /\s*?([^\s]+)\s*?/) {
+		if ($commandname =~ /\s*?\([^\s]+\)\s*?([^\s]+)/) {
 			$commandname = $1;
 		}
 		$notflag = 0;
@@ -416,9 +417,6 @@ sub parse {
 										$commandnameslist = $1;
 									}
 									foreach $realgroupname (@{resolveUsernamesAndGroupnames($groupnameslist)}) {
-										if (!defined($allowedlist{$realgroupname})) {
-											$allowedlist{$realgroupname} = ();
-										}
 										if (!defined($allowedlist{$realgroupname})) {
 											$allowedlist{$realgroupname} = ();
 										}
