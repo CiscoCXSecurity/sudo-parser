@@ -307,6 +307,9 @@ sub resolveCommandnames {
 		if ($commandname =~ /\s*?\([^\s]+\)\s*?([^\s]+)/) {
 			$commandname = $1;
 		}
+		if ($commandname =~ /\s*?([^\s]+)/) {
+			$commandname = $1;
+		}
 		$notflag = 0;
 		if ($commandname =~ /!(.*)/) {
 			$notflag = 1;
