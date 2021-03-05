@@ -28,7 +28,6 @@ use strict;
 use File::Basename;
 use Getopt::Std;
 use Cwd;
-use Data::Dumper;
 
 my @bannedlist = (
 	".*ALL.*",
