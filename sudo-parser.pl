@@ -27,7 +27,6 @@ use strict;
 
 use File::Basename;
 use Getopt::Std;
-use Cwd;
 
 my @bannedlist = (
 	".*ALL.*",
@@ -291,6 +290,7 @@ my $realusernameorgroupname;
 my $commandname;
 my $realcommandname;
 my $bannedcommandname;
+my %argumentslist;
 my $filename;
 
 sub resolveCommandnames {
@@ -451,13 +451,26 @@ sub parse {
 				}
 			} else {
 				if ($_ =~ /^#include (.*)/) {
-					print "I: parsing " . $1 . "\n";
-					parse($1);
+					if (-r $1) {
+						print "I: parsing " . $1 . "\n";
+						parse($1);
+					} else {
+						print "E: " . $1 . " not reaable\n";
+					}
 				} else {
 					if ($_ =~ /^#includedir (.*)/) {
-						print "I: parsing " . $1 . "\n";
-						foreach $includefilename (glob($1 . "/*")) {
-							parse($includefilename);
+						if (-d $1) {
+							print "I: processing directory " . $1 . "\n";
+							foreach $includefilename (glob($1 . "/*")) {
+								if (-r $includefilename) {
+									print "I: parsing " . $includefilename . "\n";
+									parse($includefilename);
+								} else {
+									print "E: " . $includefilename . " not reaable\n";
+								}
+							}
+						} else {
+							print "E: " . $1 . " not readable\n";
 						}
 					}
 				}
@@ -467,20 +480,20 @@ sub parse {
 }
 
 sub main::HELP_MESSAGE {
-	die "usage: " . basename($0) . " <filename>";
+	die "usage: " . basename($0) . " -f <filename>";
 }
 
 sub main::VERSION_MESSAGE {
 	print basename($0) . " 1.0\n";
 }
 
-$filename = shift;
-
-if (defined($filename)) {
-	if (! -e $filename) {
-		Getopt::Std::help_mess("", "main");
-	}
-} else {
+$Getopt::Std::STANDARD_HELP_VERSION = 1;
+getopts("f:", \%argumentslist);
+if (defined($argumentslist{'f'}) && (-r $argumentslist{'f'})) {
+	$filename = $argumentslist{'f'};
+}
+if (!defined($filename)) {
+	print "E: readable sudoers file not supplied\n";
 	Getopt::Std::help_mess("", "main");
 }
 
