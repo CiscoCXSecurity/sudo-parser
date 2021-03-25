@@ -292,6 +292,7 @@ my $realcommandname;
 my $bannedcommandname;
 my %argumentslist;
 my $filename;
+my $rootdirectoryname;
 
 sub resolveCommandnames {
 	my $commandnameslist;
@@ -358,6 +359,8 @@ sub resolveUsernamesAndGroupnames {
 
 sub parse {
 	my $filename;
+	my $rootdirectoryname;
+	my $ignorerootflag;
 	my $filehandle;
 	my $aliasname;
 	my $usernameslist;
@@ -370,7 +373,9 @@ sub parse {
 	my $realusername;
 	my $includefilename;
 	$filename = shift;
-	open($filehandle, "<" . $filename);
+	$rootdirectoryname = shift;
+	$ignorerootflag = shift;
+	open($filehandle, "<" . ($ignorerootflag == 1) ? $filename : $rootdirectoryname . $filename);
 	while (<$filehandle>) {
 		while ($_ =~ /(.*?)\\$/) {
 			$_ = $1 . <$filehandle>;
@@ -453,7 +458,7 @@ sub parse {
 				if ($_ =~ /^#include (.*)/) {
 					if (-r $1) {
 						print "I: parsing " . $1 . "\n";
-						parse($1);
+						parse($1, $rootdirectoryname, 0);
 					} else {
 						print "E: " . $1 . " not reaable\n";
 					}
@@ -461,10 +466,10 @@ sub parse {
 					if ($_ =~ /^#includedir (.*)/) {
 						if (-d $1) {
 							print "I: processing directory " . $1 . "\n";
-							foreach $includefilename (glob($1 . "/*")) {
+							foreach $includefilename (glob($rootdirectoryname . $1 . "/*")) {
 								if (-r $includefilename) {
 									print "I: parsing " . $includefilename . "\n";
-									parse($includefilename);
+									parse($includefilename, $rootdirectoryname, 0);
 								} else {
 									print "E: " . $includefilename . " not reaable\n";
 								}
@@ -480,7 +485,7 @@ sub parse {
 }
 
 sub main::HELP_MESSAGE {
-	die "usage: " . basename($0) . " -f <filename>";
+	die "usage: " . basename($0) . " -f <filename> [-r <rootdirectoryname>]";
 }
 
 sub main::VERSION_MESSAGE {
@@ -488,16 +493,19 @@ sub main::VERSION_MESSAGE {
 }
 
 $Getopt::Std::STANDARD_HELP_VERSION = 1;
-getopts("f:", \%argumentslist);
+getopts("f:r:", \%argumentslist);
 if (defined($argumentslist{'f'}) && (-r $argumentslist{'f'})) {
 	$filename = $argumentslist{'f'};
+}
+if (defined($argumentslist{'r'}) && (-d $argumentslist{'r'})) {
+	$rootdirectoryname = $argumentslist{'r'};
 }
 if (!defined($filename)) {
 	print "E: readable sudoers file not supplied\n";
 	Getopt::Std::help_mess("", "main");
 }
 
-parse($filename);
+parse($filename, $rootdirectoryname, 1);
 foreach $usernameorgroupname (keys %allowedlist) {
 	if (defined($useraliases{$usernameorgroupname})) {
 		foreach $realusernameorgroupname (@{resolveUsernamesAndGroupnames(join(",", @{$useraliases{$usernameorgroupname}}))}) {
