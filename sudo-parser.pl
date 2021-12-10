@@ -460,7 +460,7 @@ sub parse {
 						print "I: parsing " . $1 . "\n";
 						parse($1, $rootdirectoryname, 0);
 					} else {
-						print "E: " . $1 . " not reaable\n";
+						print "E: " . $1 . " not readable\n";
 					}
 				} else {
 					if ($_ =~ /^#includedir (.*)/) {
@@ -471,7 +471,7 @@ sub parse {
 									print "I: parsing " . $includefilename . "\n";
 									parse($includefilename, $rootdirectoryname, 0);
 								} else {
-									print "E: " . $includefilename . " not reaable\n";
+									print "E: " . $includefilename . " not readable\n";
 								}
 							}
 						} else {
